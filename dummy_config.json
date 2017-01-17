@@ -1,0 +1,24 @@
+{
+  "ids": "ids.json",
+  "rbt": {
+    "appid": "ebay app id",
+    "ya_host": "smtp.yandex.com",
+    "ya_port": 465,
+    "ya_usr": "user",
+    "ya_pwd": "pass",
+    "from_email": "user@yandex.com",
+    "to_email": "target@email.com"
+  },
+  "srch": [
+    {
+      "keywords": "keyword",
+      "price_min": "0",
+      "price_max": "100"
+    },
+    {
+      "keywords": "keyword",
+      "price_min": "0",
+      "price_max": "100"
+    }
+  ]
+}

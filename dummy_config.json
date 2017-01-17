@@ -1,5 +1,7 @@
 {
   "ids": "ids.json",
+  "errlog": "err.log",
+  "stats": "stats.json",
   "delay": 1,
   "rbt": {
     "appid": "ebay app id",

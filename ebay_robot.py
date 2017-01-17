@@ -193,7 +193,7 @@ class EbayRobot(object):
         server.quit()
 
     def save_dict(self):
-        if self.dict_needs_update == 1:
+        if self.dict_needs_update:
             with open(self.ids_file, 'r') as in_file:
                 try:
                     data = json.load(in_file)

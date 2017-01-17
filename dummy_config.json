@@ -13,12 +13,19 @@
     {
       "keywords": "keyword",
       "price_min": "0",
-      "price_max": "100"
+      "price_max": "100",
+      "type": [
+        "Auction"
+      ]
     },
     {
       "keywords": "keyword",
       "price_min": "0",
-      "price_max": "100"
+      "price_max": "100",
+      "type": [
+        "AuctionWithBIN",
+        "FixedPrice"
+      ]
     }
   ]
 }

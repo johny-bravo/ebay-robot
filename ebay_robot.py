@@ -1,4 +1,5 @@
 import re
+import time
 import json
 import smtplib
 import collections
@@ -8,23 +9,24 @@ from ebaysdk.finding import Connection
 
 
 def wr_html(str_to_wrap):
+    """ wrap string in basic html """
     return '<html><head></head><body>%s</body></html>' % str_to_wrap
 
 
 def wr_tag(tag, str_to_wrap, options=''):
-    """ wrap in html, optional inline style """
+    """ wrap in html <tag> """
     if options:
         options = ' %s' % options
     return '<%s%s>%s</%s>' % (tag, options, str_to_wrap, tag)
 
 
 def wr_img(url, w, h):
-    """ wrap in html """
+    """ wrap in html <img src> """
     return '<img src="%s" width="%s" height="%s"/>' % (url, w, h)
 
 
 def wr_hrf(url, title):
-    """ wrap in html """
+    """ wrap in html <a href> """
     return '<a href="%s">%s</a>' % (url, title)
 
 
@@ -33,8 +35,10 @@ class EbayRobot(object):
 
         self.id_dict = id_dict
         self.dict_needs_update = 0
-        self.crnt_srch = ''
+        self.crnt_srch_key = ''
+        self.crnt_srch_type = ''
 
+        self.delay = config['delay']
         self.srch_conf = config['srch']
         self.ids_file = config['ids']
         self.appid = config['rbt']['appid']
@@ -49,7 +53,13 @@ class EbayRobot(object):
 
     def search_data(self, srch_config):
 
-        self.crnt_srch = srch_config['keywords'].title()
+        """
+        search api
+        returns {dict}
+        """
+        self.crnt_srch_key = srch_config['keywords'].title()
+        self.crnt_srch_type = srch_config['type'][0]
+
         self.api.execute('findItemsAdvanced', {
             'keywords': srch_config['keywords'],
             'categoryId': '27386',
@@ -65,7 +75,7 @@ class EbayRobot(object):
                  'paramName': 'Currency',
                  'paramValue': 'USD'},
                 {'name': 'ListingType',
-                 'value': ['AuctionWithBIN', 'FixedPrice']}
+                 'value': srch_config['type']}
             ],
             'paginationInput': {
                 'entriesPerPage': '25',
@@ -166,7 +176,8 @@ class EbayRobot(object):
             nm_fnd_itms = 0
 
         if not subj:
-            subj = "Found %d new %s" % (nm_fnd_itms, self.crnt_srch)
+            subj = "Found %d new %s %s" % (nm_fnd_itms, self.crnt_srch_type,
+                                           self.crnt_srch_key)
 
         msg = MIMEMultipart()
         msg['From'] = 'Ebay Robot <' + self.from_email + '>'
@@ -193,18 +204,25 @@ class EbayRobot(object):
                 out_file.write(json.dumps(data, sort_keys=True, indent=2))
 
     def run(self):
+        """
+        email on error
+        """
         srch_conf_lst = self.srch_conf
-        try:
-            for srch_config in srch_conf_lst:
-                srch_data = self.search_data(srch_config)
-                resp_str = self.parse_response(srch_data)
-                if resp_str:
-                    self.send_mail(resp_str)
-                    self.save_dict()
-        except Exception as e:
-            er_html = wr_html(str(e))
-            er_subj = 'An Error Occured'
-            self.send_mail(er_html, er_subj)
+        while 1:
+            try:
+                for srch_config in srch_conf_lst:
+                    srch_data = self.search_data(srch_config)
+                    resp_str = self.parse_response(srch_data)
+                    if resp_str:
+                        self.send_mail(resp_str)
+                        self.save_dict()
+            except Exception as e:
+                er_html = wr_html(str(e))
+                er_subj = 'An Error Occured'
+                self.send_mail(er_html, er_subj)
+
+            finally:
+                time.sleep(self.delay)
 
 
 if __name__ == '__main__':
@@ -219,6 +237,8 @@ if __name__ == '__main__':
     except ValueError:
         ids = {}
 
-    #
     ebr = EbayRobot(ids, cnf)
-    ebr.run()
+    for f in cnf['srch']:
+        print ebr.search_data(f)
+
+        # ebr.run()

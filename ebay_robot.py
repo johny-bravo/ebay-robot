@@ -238,7 +238,4 @@ if __name__ == '__main__':
         ids = {}
 
     ebr = EbayRobot(ids, cnf)
-    for f in cnf['srch']:
-        print ebr.search_data(f)
-
-        # ebr.run()
+    ebr.run()

@@ -1,5 +1,6 @@
 {
   "ids": "ids.json",
+  "delay": 1,
   "rbt": {
     "appid": "ebay app id",
     "ya_host": "smtp.yandex.com",
@@ -23,8 +24,8 @@
       "price_min": "0",
       "price_max": "100",
       "type": [
-        "AuctionWithBIN",
-        "FixedPrice"
+        "FixedPrice",
+        "AuctionWithBIN"
       ]
     }
   ]

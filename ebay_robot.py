@@ -280,7 +280,7 @@ class EbayRobot(object):
                     er_html = wr_html(str(e))
                     er_subj = 'An Error Occured'
                     self.send_mail(er_html, er_subj)
-                    if self.crit_err > 3:
+                    if self.crit_err >= 3:
                         sys.exit('too much critical errors,'
                                  'exited to avoid spam')
 

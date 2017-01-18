@@ -9,6 +9,11 @@ from email.mime.text import MIMEText
 from ebaysdk.finding import Connection
 
 
+def sv_log(msg, log_file):
+    with open(log_file, 'a') as lf:
+        lf.write('%d\t%s\n' % (time.time(), msg))
+
+
 def sv_log_err(err, log_file):
     err = str(err)
     line = str(sys.exc_info()[-1].tb_lineno)
@@ -281,8 +286,9 @@ class EbayRobot(object):
                     er_subj = 'An Error Occured'
                     self.send_mail(er_html, er_subj)
                     if self.crit_err >= 3:
-                        sys.exit('too much critical errors,'
-                                 'exited to avoid spam')
+                        sv_log('Too much critical errors.'
+                               'Gonna sleep for some time', self.err_file)
+                        time.sleep(60 * 60)
 
                 finally:
                     time.sleep(self.delay)

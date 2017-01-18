@@ -43,6 +43,7 @@ class EbayRobot(object):
 
         self.id_dict = id_dict
 
+        self.crit_err = 0
         self.dict_needs_update = 0
         self.crnt_found_items = 0
         self.crnt_srch_key = ''
@@ -274,10 +275,15 @@ class EbayRobot(object):
                             self.save_dict()
                 except Exception, e:
                     sv_log_err(e, self.err_file)
+                    self.crit_err += 1
                     stats['err'] += 1
                     er_html = wr_html(str(e))
                     er_subj = 'An Error Occured'
                     self.send_mail(er_html, er_subj)
+                    if self.crit_err > 3:
+                        sys.exit('too much critical errors,'
+                                 'exited to avoid spam')
+
                 finally:
                     time.sleep(self.delay)
 

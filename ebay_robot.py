@@ -265,9 +265,11 @@ class EbayRobot(object):
                     for srch_config in srch_conf_lst:
                         srch_data = self.search_data(srch_config)
                         stats['req'] += 1
+                        # .parse_response() sets .crnt_found_items
                         resp_str = self.parse_response(srch_data)
                         if resp_str:
                             stats['found'] += self.crnt_found_items
+                            # .send_mail() resets .crnt_found_items to 0
                             self.send_mail(resp_str)
                             self.save_dict()
                 except Exception, e:

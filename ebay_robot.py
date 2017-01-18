@@ -184,7 +184,6 @@ class EbayRobot(object):
         return mail_html
 
     def send_mail(self, mail_html, subj=''):
-
         if not subj:
             subj = "Found %d new %s %s" % (self.crnt_found_items,
                                            self.crnt_srch_type,
@@ -319,6 +318,7 @@ def setup():
 
 
 if __name__ == '__main__':
+    # nohup $python ebay_robot.py &
     cnf, ids = setup()
     ebr = EbayRobot(ids, cnf)
     ebr.run()

@@ -267,9 +267,9 @@ class EbayRobot(object):
                         stats['req'] += 1
                         resp_str = self.parse_response(srch_data)
                         if resp_str:
+                            stats['found'] += self.crnt_found_items
                             self.send_mail(resp_str)
                             self.save_dict()
-                            stats['found'] += 1
                 except Exception, e:
                     sv_log_err(e, self.err_file)
                     stats['err'] += 1
@@ -289,9 +289,14 @@ class EbayRobot(object):
                 stat_html = wr_html(stat_str)
                 stat_subj = 'Stats report #%d' % tm_crnt
 
-                stats['last'] = tm_crnt
-
+                stats_reset = {
+                    'req': 0,
+                    'found': 0,
+                    'err': 0,
+                    'tm_last': tm_crnt,
+                }
                 self.send_mail(stat_html, stat_subj)
+                self.stats_update(stats_reset)
 
 
 def setup():

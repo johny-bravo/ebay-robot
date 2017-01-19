@@ -255,6 +255,21 @@ class EbayRobot(object):
             stats_data.update(stat_upd_dict)
             outfile.write(json.dumps(stats_data, indent=2))
 
+    def hndl_crit_err(self, e):
+        sv_log_err(e, self.err_file)
+        self.err_cnt += 1
+        self.tm_last_err = time.time()
+        err_html = wr_html(str(e))
+        err_subj = 'Critical Error Occured #%d ' % self.tm_last_err
+        self.send_mail(err_html, err_subj)
+        if self.err_cnt >= 3:
+            tm_now = time.time()
+            if (tm_now - self.tm_last_err) <= (60 * 5):
+                sv_log_msg('Too much critical errors. '
+                           'Gonna sleep for some time', self.err_file)
+                self.err_cnt = 0
+                time.sleep(60 * 60)
+
     def run(self):
         """
         email on found or error
@@ -280,22 +295,8 @@ class EbayRobot(object):
                             self.send_mail(resp_str)
                             self.save_dict()
                 except Exception, e:
-                    sv_log_err(e, self.err_file)
-                    self.err_cnt += 1
-                    self.tm_last_err = time.time()
                     stats['err'] += 1
-                    er_html = wr_html(str(e))
-                    er_subj = 'An Error Occured'
-                    self.send_mail(er_html, er_subj)
-                    if self.err_cnt >= 3:
-                        tm_now = time.time()
-                        if (tm_now - self.tm_last_err) <= (60 * 5):
-                            sv_log_msg('Too much critical errors. '
-                                       'Gonna sleep for some time',
-                                       self.err_file)
-                            self.err_cnt = 0
-                            time.sleep(60 * 60)
-
+                    self.hndl_crit_err(e)
                 finally:
                     time.sleep(self.delay)
 

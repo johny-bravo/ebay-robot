@@ -48,7 +48,7 @@ class EbayRobot(object):
 
         self.id_dict = id_dict
 
-        self.err = 0
+        self.err_cnt = 0
         self.tm_last_err = 0
         self.dict_needs_update = 0
         self.crnt_found_items = 0
@@ -281,39 +281,39 @@ class EbayRobot(object):
                             self.save_dict()
                 except Exception, e:
                     sv_log_err(e, self.err_file)
-                    self.err += 1
+                    self.err_cnt += 1
                     self.tm_last_err = time.time()
                     stats['err'] += 1
                     er_html = wr_html(str(e))
                     er_subj = 'An Error Occured'
                     self.send_mail(er_html, er_subj)
-                    if self.err >= 3:
+                    if self.err_cnt >= 3:
                         tm_now = time.time()
                         if (tm_now - self.tm_last_err) <= (60 * 5):
                             sv_log_msg('Too much critical errors. '
                                        'Gonna sleep for some time',
                                        self.err_file)
-                            self.err = 0
+                            self.err_cnt = 0
                             time.sleep(60 * 60)
 
                 finally:
                     time.sleep(self.delay)
 
-            tm_crnt = time.time()
-            if (tm_crnt - stats['last']) >= tm_day:
+            tm_now = time.time()
+            if (tm_now - stats['last']) >= tm_day:
                 stat_str = 'Requests made: %d. ' \
                            'Items found: %d. ' \
                            'Critical errors occured: %d' % (
                                stats['req'], stats['found'], stats['err']
                            )
                 stat_html = wr_html(stat_str)
-                stat_subj = 'Stats report #%d' % tm_crnt
+                stat_subj = 'Stats report #%d' % tm_now
 
                 stats_reset = {
                     'req': 0,
                     'found': 0,
                     'err': 0,
-                    'tm_last': tm_crnt,
+                    'tm_last': tm_now,
                 }
                 self.send_mail(stat_html, stat_subj)
                 self.stats_update(stats_reset)

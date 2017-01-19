@@ -140,6 +140,7 @@ class EbayRobot(object):
             itm_id = itm['itemId']
             tb_row = ''
 
+            # todo: replace {OrderedDict} with [list]
             fltr_d = collections.OrderedDict()
             fltr_d['img'] = itm['galleryURL']
             fltr_d['url'] = itm['viewItemURL']
@@ -328,10 +329,10 @@ def setup():
     except ValueError, e:
         sv_log_err(e, config['errlog'])
         ids_dict = {}
-    return config, ids_dict
+    return ids_dict, config
 
 
 if __name__ == '__main__':
-    cnf, ids = setup()
+    ids, cnf = setup()
     ebr = EbayRobot(ids, cnf)
     ebr.run()

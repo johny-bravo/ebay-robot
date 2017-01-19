@@ -48,7 +48,8 @@ class EbayRobot(object):
 
         self.id_dict = id_dict
 
-        self.crit_err = 0
+        self.err = 0
+        self.tm_last_err = 0
         self.dict_needs_update = 0
         self.crnt_found_items = 0
         self.crnt_srch_key = ''
@@ -140,7 +141,6 @@ class EbayRobot(object):
             itm_id = itm['itemId']
             tb_row = ''
 
-            # todo: replace {OrderedDict} with [list]
             fltr_d = collections.OrderedDict()
             fltr_d['img'] = itm['galleryURL']
             fltr_d['url'] = itm['viewItemURL']
@@ -281,16 +281,20 @@ class EbayRobot(object):
                             self.save_dict()
                 except Exception, e:
                     sv_log_err(e, self.err_file)
-                    self.crit_err += 1
+                    self.err += 1
+                    self.tm_last_err = time.time()
                     stats['err'] += 1
                     er_html = wr_html(str(e))
                     er_subj = 'An Error Occured'
                     self.send_mail(er_html, er_subj)
-                    if self.crit_err >= 3:
-                        sv_log_msg('Too much critical errors.'
-                                   ' Gonna sleep for some time', self.err_file)
-                        self.crit_err = 0
-                        time.sleep(60 * 60)
+                    if self.err >= 3:
+                        tm_now = time.time()
+                        if (tm_now - self.tm_last_err) <= (60 * 5):
+                            sv_log_msg('Too much critical errors. '
+                                       'Gonna sleep for some time',
+                                       self.err_file)
+                            self.err = 0
+                            time.sleep(60 * 60)
 
                 finally:
                     time.sleep(self.delay)

@@ -271,13 +271,18 @@ class EbayRobot(object):
                 self.err_cnt = 0
                 time.sleep(60 * 60)
 
-    def chk_stat_need_mailed(self, stats, tm_day):
+    def chk_stat_need_mailed(self, stats, mail_interval):
         tm_now = time.time()
-        if (tm_now - stats['last']) >= tm_day:
-            stat_str = 'Requests made: %d. ' \
+        tm_diff = tm_now - stats['last']
+
+        if tm_diff >= mail_interval:
+            m, s = divmod(tm_diff, 60)
+            h, m = divmod(m, 60)
+            stat_str = 'Time passed: %d:%02d:%02d' \
+                       'Requests made: %d. ' \
                        'Items found: %d. ' \
                        'Critical errors occured: %d' % (
-                           stats['req'], stats['found'], stats['err']
+                           h, m, s, stats['req'], stats['found'], stats['err']
                        )
             stat_html = wr_html(stat_str)
             stat_subj = 'Stats report #%d' % tm_now

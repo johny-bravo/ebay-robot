@@ -81,6 +81,7 @@ class EbayRobot(object):
         self.crnt_srch_key = srch_config['keywords'].title()
         self.crnt_srch_type = srch_config['type'][0]
 
+        # todo: refactor out category and condition to json config
         self.api.execute('findItemsAdvanced', {
             'keywords': srch_config['keywords'],
             'categoryId': '27386',

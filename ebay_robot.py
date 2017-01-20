@@ -271,6 +271,26 @@ class EbayRobot(object):
                 self.err_cnt = 0
                 time.sleep(60 * 60)
 
+    def chk_stat_need_mailed(self, stats, tm_day):
+        tm_now = time.time()
+        if (tm_now - stats['last']) >= tm_day:
+            stat_str = 'Requests made: %d. ' \
+                       'Items found: %d. ' \
+                       'Critical errors occured: %d' % (
+                           stats['req'], stats['found'], stats['err']
+                       )
+            stat_html = wr_html(stat_str)
+            stat_subj = 'Stats report #%d' % tm_now
+
+            stats_reset = {
+                'req': 0,
+                'found': 0,
+                'err': 0,
+                'tm_last': tm_now,
+            }
+            self.send_mail(stat_html, stat_subj)
+            self.stats_update(stats_reset)
+
     def run(self):
         """
         email on found or error
@@ -281,6 +301,7 @@ class EbayRobot(object):
 
         while 1:
             stats = self.stats_init()
+            self.chk_stat_need_mailed(stats, tm_day)
             for f in range(tm_day):
                 if (f + 1) % upd_freq == 0:
                     self.stats_update(stats)
@@ -300,25 +321,6 @@ class EbayRobot(object):
                     self.hndl_crit_err(e)
                 finally:
                     time.sleep(self.delay)
-
-            tm_now = time.time()
-            if (tm_now - stats['last']) >= tm_day:
-                stat_str = 'Requests made: %d. ' \
-                           'Items found: %d. ' \
-                           'Critical errors occured: %d' % (
-                               stats['req'], stats['found'], stats['err']
-                           )
-                stat_html = wr_html(stat_str)
-                stat_subj = 'Stats report #%d' % tm_now
-
-                stats_reset = {
-                    'req': 0,
-                    'found': 0,
-                    'err': 0,
-                    'tm_last': tm_now,
-                }
-                self.send_mail(stat_html, stat_subj)
-                self.stats_update(stats_reset)
 
 
 def setup():

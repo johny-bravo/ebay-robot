@@ -273,10 +273,10 @@ class EbayRobot(object):
 
     def chk_stat_need_mailed(self, stats, mail_interval):
         tm_now = time.time()
-        tm_diff = tm_now - stats['last']
+        sec_passed = tm_now - stats['last']
 
-        if tm_diff >= mail_interval:
-            m, s = divmod(tm_diff, 60)
+        if sec_passed >= mail_interval:
+            m, s = divmod(sec_passed, 60)
             h, m = divmod(m, 60)
             stat_str = 'Time passed: %d:%02d:%02d' \
                        'Requests made: %d. ' \

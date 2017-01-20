@@ -273,7 +273,6 @@ class EbayRobot(object):
 
     def chk_stat_need_mailed(self, stats, tm_day):
         tm_now = time.time()
-        print (tm_now - stats['last']) >= tm_day
         if (tm_now - stats['last']) >= tm_day:
             stat_str = 'Requests made: %d. ' \
                        'Items found: %d. ' \
@@ -302,7 +301,6 @@ class EbayRobot(object):
 
         while 1:
             stats = self.stats_init()
-            print stats
             self.chk_stat_need_mailed(stats, tm_day)
             for f in range(tm_day):
                 if (f + 1) % upd_freq == 0:

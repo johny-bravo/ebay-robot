@@ -278,9 +278,9 @@ class EbayRobot(object):
         if sec_passed >= mail_interval:
             m, s = divmod(sec_passed, 60)
             h, m = divmod(m, 60)
-            stat_str = 'Time passed: %d:%02d:%02d' \
-                       'Requests made: %d. ' \
-                       'Items found: %d. ' \
+            stat_str = 'Time passed: %d:%02d:%02d<br>' \
+                       'Requests made: %d.<br>' \
+                       'Items found: %d.<br>' \
                        'Critical errors occured: %d' % (
                            h, m, s, stats['req'], stats['found'], stats['err']
                        )

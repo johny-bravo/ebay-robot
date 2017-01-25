@@ -54,6 +54,7 @@ class EbayRobot(object):
         self.crnt_found_items = 0
         self.crnt_srch_key = ''
         self.crnt_srch_type = ''
+        self.stats = {}
 
         self.delay = config['delay']
         self.srch_conf_lst = config['srch']
@@ -242,6 +243,7 @@ class EbayRobot(object):
             sv_log_err(e, self.err_file)
             pass
 
+        self.stats.update(stats_data)
         return stats_data
 
     def stats_update(self, stat_upd_dict):
@@ -255,6 +257,8 @@ class EbayRobot(object):
         with open(self.stats_file, 'w') as outfile:
             stats_data.update(stat_upd_dict)
             outfile.write(json.dumps(stats_data, indent=2))
+
+        self.stats.update(stat_upd_dict)
 
     def hndl_crit_err(self, e):
         sv_log_err(e, self.err_file)
@@ -276,13 +280,14 @@ class EbayRobot(object):
         sec_passed = tm_now - stats['last']
 
         if sec_passed >= mail_interval:
-            m, s = divmod(sec_passed, 60)
-            h, m = divmod(m, 60)
+            mn, sc = divmod(sec_passed, 60)
+            hr, mn = divmod(mn, 60)
             stat_str = 'Time passed: %d:%02d:%02d<br>' \
                        'Requests made: %d.<br>' \
                        'Items found: %d.<br>' \
                        'Critical errors occured: %d' % (
-                           h, m, s, stats['req'], stats['found'], stats['err']
+                           hr, mn, sc,
+                           stats['req'], stats['found'], stats['err']
                        )
             stat_html = wr_html(stat_str)
             stat_subj = 'Stats report #%d' % tm_now
@@ -305,24 +310,24 @@ class EbayRobot(object):
         upd_freq = 30 * 60  # save stats approx every 30 min
 
         while 1:
-            stats = self.stats_init()
-            self.chk_stat_need_mailed(stats, tm_day)
+            self.stats_init()
+            self.chk_stat_need_mailed(self.stats, tm_day)
             for f in range(tm_day):
                 if (f + 1) % upd_freq == 0:
-                    self.stats_update(stats)
+                    self.stats_update(self.stats)
                 try:
                     for srch_config in srch_conf_lst:
                         srch_data = self.search_data(srch_config)
-                        stats['req'] += 1
+                        self.stats['req'] += 1
                         # .parse_response() sets .crnt_found_items
                         resp_str = self.parse_response(srch_data)
                         if resp_str:
-                            stats['found'] += self.crnt_found_items
+                            self.stats['found'] += self.crnt_found_items
                             # .send_mail() resets .crnt_found_items to 0
                             self.send_mail(resp_str)
                             self.save_dict()
                 except Exception, e:
-                    stats['err'] += 1
+                    self.stats['err'] += 1
                     self.hndl_crit_err(e)
                 finally:
                     time.sleep(self.delay)
